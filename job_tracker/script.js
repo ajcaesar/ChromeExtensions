@@ -1,0 +1,1 @@
+//make react component for table column 
