@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>track jobs here</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <script src="index.js" defer></script>
+</head>
+<body>
+    <h1 id="head">input information below</h1>
+    <form id="main-form">
+    <div id ="all-inputs">
+    <div class="container">
+        <label class="column-label" id="url" for="site-link">url</label>
+        <input class="column-input" type="text" id="site-link">
+    </div>
+    </div>    
+    <div id="bottom">
+    <button type="submit" id="save-link">save to spreadsheet</button>
+    </form>
+    <button id="add-section">add column</button>
+    </div>
+    <div id="overlay" class="hide"></div>
+    <div id="new-column-form">
+    <form id="new-column" class="hide">
+        <button class="del btn btn-block btn-danger" id="new-col-del"><i class="fas fa-trash"></i></button>
+        <label for="new-column-input-text">column name</label>
+        <input type="text" id="new-column-input-text">
+        <button id="new-column-submit" type="submit">create column</button>
+    </form>
+</div>
+</body>
+</html>
