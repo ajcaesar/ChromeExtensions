@@ -14,6 +14,7 @@ const urlInputBtn = document.getElementById("input-url-in");
 function setCurrentTabUrl() {
     // Check if Chrome API is available
     if (chrome && chrome.tabs) {
+        console.log('set in place')
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             if (tabs[0] && tabs[0].url) {
                 urlInput.value = tabs[0].url;
