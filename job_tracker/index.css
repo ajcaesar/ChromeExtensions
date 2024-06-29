@@ -107,7 +107,8 @@ h1 {
 .col-del-button {
     right: 0;
     top: 0;
-    width: max(min(35px, 5vw), 20px);
+    width: 20px; 
+    height: 28px;
 }
 
 .new-column {
@@ -159,7 +160,7 @@ button#new-column-submit {
 }
 
 #bottom button, #new-column-submit {
-    width: max(30vw, 200px);
+    width: max(20vw, 150px);
     padding: 5px;
     font-size: max(min(1rem, 25px), 16px);
     background-color: #0E8011;
