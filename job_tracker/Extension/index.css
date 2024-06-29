@@ -1,0 +1,211 @@
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+
+}
+
+:root {
+    --bkg: #B4D9EF;
+}
+
+body {
+    background-color: var(--bkg);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    border-radius: 10px;
+}
+
+html {
+    font-size: 2vw;
+}
+
+#head {
+    margin: 20px;
+}
+
+h1 {
+    font-size: max(min(3rem, 30px), 16px);
+}
+
+#all-inputs {
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+    margin: 0;
+    margin-left: 20px;
+    margin-right: 20px;
+    padding: 0;
+    justify-content: flex-start;
+    gap: 5px;
+}
+
+#all-inputs.hide {
+    display: none;
+}
+
+#newEntryLabel {
+    font-size: 1rem;
+    margin-left: 5px;
+}
+
+#colTitles {
+    margin-left: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: top;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+    /* padding: 10px; */
+    min-width: 100px;
+    max-width: 500px;
+    resize: horizontal;
+    overflow: hidden;
+    padding: 0px;
+    margin: 0px;
+}
+
+.column-label {
+    font-size: max(min(1.5rem, 28px), 16px);
+    margin-left: 10px;
+}
+
+.column-input {
+    resize: horizontal;
+    overflow: auto;
+    border: 1px solid #ccc;
+    padding: 5px;
+    max-width: 100%; /* Prevent expanding beyond container */
+    width: 100%; /* Make sure the input takes full width of the container */
+    box-sizing: border-box; /* Include padding in the width calculation */
+    margin: 0;
+}
+
+.column-input:hover {
+    border-color: #999;
+}
+
+.column-input:active {
+    border-color: #555;
+}
+
+.column-input::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    background: linear-gradient(135deg, transparent 50%, #ccc 50%);
+    cursor: se-resize;
+  }
+
+.del {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    width: max(min(35px, 5vw), 25px);
+    aspect-ratio: 1/1;
+    padding: 5px;
+    background-color: #F36465;
+    border-radius: 5px;
+}
+
+.col-del-button {
+    right: 0;
+    top: 0;
+    width: 15px; 
+    height: 23px;
+    font-size: auto;
+    padding: 0;
+    padding: 2px 3px;
+}
+
+.new-column {
+    position: relative;
+}
+
+input {
+    margin: 0;
+    padding: 0;
+}
+
+#new-column {
+    position: relative;
+    --width: max(50vw, 300px);
+    width: var(--width);
+    aspect-ratio: 1/.2;
+    background-color: lightgray;
+    border-radius: 10px;
+    position: absolute;
+    font-size: max(1.5rem, 30px);
+    left: calc(0.5 * calc(100vw - var(--width)));
+    top: 10px;
+    padding: 20px;
+    padding-bottom: 0px;
+    margin: 0;
+    border: 2px solid #0E8011;
+    z-index: 1001;
+}
+
+#new-column-input-text {
+    position: relative;
+    width: 80%;
+    height: 40px;
+    margin-left: 10%;
+    font-size: 50%;
+    margin-bottom: 10px;
+}
+
+button#new-column-submit {
+    width: 50%;
+    margin-left: 25%;
+}
+
+#bottom {
+    margin-left: 20px;
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    margin-right: 20px;
+}
+
+#bottom button, #new-column-submit {
+    width: max(20vw, 200px);
+    padding: 5px;
+    font-size: max(min(1rem, 25px), 16px);
+    background-color: #0E8011;
+    color: white;
+    border-radius: 10px;
+    margin-right: 0px;
+    margin-bottom: 5px;
+}
+
+.hide {
+    display: none;
+}
+
+.dim {
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .5);
+    pointer-events: none;
+}
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000; /* Lower z-index for the overlay */
+    pointer-events: none;
+}
+
+input {
+    padding: 10px;
+}
