@@ -7,7 +7,7 @@ let delButtons = document.querySelectorAll(".col-del-button")
 
 let colNames = JSON.parse(localStorage.getItem("colNames"));
 
-const urlInput = document.getElementById("site-link");
+let urlInput = document.getElementById("site-link");
 const urlInputBtn = document.getElementById("input-url-in");
 
 // Function to get and set the current tab's URL
@@ -56,6 +56,7 @@ const renderNames = () => {
     }
     inputs.innerHTML = str;
     delButtons = document.querySelectorAll(".col-del-button");
+    urlInput = document.getElementById("site-link");
 
     delButtons.forEach(button => {
         console.log("hello there");
