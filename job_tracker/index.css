@@ -47,19 +47,20 @@ h1 {
 .container {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-end;
     position: relative;
     /* padding: 10px; */
     min-width: 100px;
     max-width: 500px;
     resize: horizontal;
-    overflow: scroll;
-    gap: 5px;
+    overflow: hidden;
+    padding: 0px;
+    margin: 0px;
 }
-
 
 .column-label {
     font-size: max(min(2rem, 32px), 20px);
+    margin-left: 10px;
 }
 
 .column-input {
@@ -70,6 +71,7 @@ h1 {
     max-width: 100%; /* Prevent expanding beyond container */
     width: 100%; /* Make sure the input takes full width of the container */
     box-sizing: border-box; /* Include padding in the width calculation */
+    margin: 0;
 }
 
 .column-input:hover {
@@ -104,6 +106,7 @@ h1 {
 
 .col-del-button {
     right: 0;
+    top: 0;
 }
 
 .del

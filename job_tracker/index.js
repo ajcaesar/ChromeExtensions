@@ -4,8 +4,15 @@ const newColForm = document.getElementById("new-column");
 const newColDel = document.getElementById("new-col-del");
 const inputs = document.getElementById("all-inputs");
 let delButtons = document.querySelectorAll(".col-del-button")
+const urlInput = document.getElementById("url");
 
 let colNames = JSON.parse(localStorage.getItem("colNames"));
+
+document.addEventListener('DOMContentLoaded', function() {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        urlInput.value = tabs[0].url;
+    })
+});
 
 const removeCol = (event) => {
     const targetElement = event.target.closest('.container');
