@@ -59,7 +59,7 @@ h1 {
 }
 
 .column-label {
-    font-size: max(min(2rem, 32px), 20px);
+    font-size: max(min(1.5rem, 28px), 16px);
     margin-left: 10px;
 }
 
@@ -107,9 +107,8 @@ h1 {
 .col-del-button {
     right: 0;
     top: 0;
+    width: max(min(35px, 5vw), 20px);
 }
-
-.del
 
 .new-column {
     position: relative;
