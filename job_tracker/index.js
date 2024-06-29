@@ -4,22 +4,33 @@ const newColForm = document.getElementById("new-column");
 const newColDel = document.getElementById("new-col-del");
 const inputs = document.getElementById("all-inputs");
 let delButtons = document.querySelectorAll(".col-del-button")
-const urlInput = document.getElementById("save-link");
-const urlInputBtn = document.getElementById("input-url-in");
 
 let colNames = JSON.parse(localStorage.getItem("colNames"));
 
-document.addEventListener('DOMContentLoaded', function() {
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        urlInput.value = tabs[0].url;
-    })
-});
+const urlInput = document.getElementById("site-link");
+const urlInputBtn = document.getElementById("input-url-in");
 
-urlInputBtn.addEventListener('DOMContentLoaded', function() {
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        urlInput.value = tabs[0].url;
-    })
-});
+// Function to get and set the current tab's URL
+function setCurrentTabUrl() {
+    // Check if Chrome API is available
+    if (chrome && chrome.tabs) {
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            if (tabs[0] && tabs[0].url) {
+                urlInput.value = tabs[0].url;
+            }
+        });
+    } else {
+        console.log("Chrome API not available. Are you testing in a browser?");
+    }
+}
+
+// Set URL when the extension loads
+document.addEventListener('DOMContentLoaded', setCurrentTabUrl);
+
+// Set URL when the button is clicked
+urlInputBtn.addEventListener('click', setCurrentTabUrl);
+
+// ... rest of your code
 
 const removeCol = (event) => {
     const targetElement = event.target.closest('.container');
