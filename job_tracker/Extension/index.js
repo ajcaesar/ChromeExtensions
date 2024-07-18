@@ -156,20 +156,22 @@ newColForm.addEventListener("submit", (event) => {
 const signInButton = document.getElementById('signin');
 let isSignedIn = false;
 
-// Function to check sign-in status
 function checkSignInStatus() {
-  chrome.identity.getAuthToken({ interactive: false }, function(token) {
-    if (chrome.runtime.lastError) {
-      console.log('Not signed in');
-      updateSignInButton(false);
-    } else {
-      console.log('Signed in');
-      isSignedIn = true;
-      updateSignInButton(true);
-      fetchUserInfo(token);
-    }
-  });
-}
+    chrome.identity.getAuthToken({ interactive: false }, function(token) {
+      if (chrome.runtime.lastError) {
+        console.log('Not signed in');
+        updateSignInButton(false);
+        chooseSpreadsheetButton.style.display = 'none';
+      } else {
+        console.log('Signed in');
+        isSignedIn = true;
+        oauthToken = token;
+        updateSignInButton(true);
+        chooseSpreadsheetButton.style.display = 'inline-block';
+        fetchUserInfo(token);
+      }
+    });
+  }
 
 // Function to update button text and functionality
 function updateSignInButton(signedIn) {
@@ -236,3 +238,51 @@ document.addEventListener('DOMContentLoaded', checkSignInStatus);
 
 // Remove the old event listener
 // signInButton.addEventListener('click', signIn);
+
+const chooseSpreadsheetButton = document.getElementById('chooseSpreadsheet');
+let pickerApiLoaded = false;
+let oauthToken;
+
+function loadPickerApi() {
+  gapi.load('picker', {'callback': onPickerApiLoad});
+}
+
+function onPickerApiLoad() {
+  pickerApiLoaded = true;
+  createPicker();
+}
+
+function createPicker() {
+  if (pickerApiLoaded && oauthToken) {
+    const picker = new google.picker.PickerBuilder()
+      .addView(google.picker.ViewId.SPREADSHEETS)
+      .setOAuthToken(oauthToken)
+      .setDeveloperKey('YOUR_DEVELOPER_KEY') // Replace with your actual developer key
+      .setCallback(pickerCallback)
+      .build();
+    picker.setVisible(true);
+  }
+}
+
+function pickerCallback(data) {
+  if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
+    const doc = data[google.picker.Response.DOCUMENTS][0];
+    const spreadsheetId = doc[google.picker.Document.ID];
+    const spreadsheetUrl = doc[google.picker.Document.URL];
+    console.log('The user selected: ' + spreadsheetUrl);
+    // Here you can save the spreadsheetId or URL for later use
+    // For example, you might want to store it in chrome.storage
+    chrome.storage.sync.set({selectedSpreadsheetId: spreadsheetId}, function() {
+      console.log('Spreadsheet ID saved');
+    });
+  }
+}
+
+// Add an event listener for the Choose Spreadsheet button
+chooseSpreadsheetButton.addEventListener('click', function() {
+  if (!pickerApiLoaded) {
+    loadPickerApi();
+  } else {
+    createPicker();
+  }
+});

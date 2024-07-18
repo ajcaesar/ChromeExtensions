@@ -7,13 +7,16 @@
         "default_icon": "icon.png"
     }, 
         "permissions": [
-          "identity"
+          "identity",
+          "storage"
         ],
         "oauth2": {
           "client_id": "854222923020-kimgpc36bprh87lahv989fis4ql3oav7.apps.googleusercontent.com",
           "scopes": [
             "https://www.googleapis.com/auth/userinfo.email",
-            "https://www.googleapis.com/auth/userinfo.profile"
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "https://www.googleapis.com/auth/drive.readonly"
           ]
-        }
+        },
+        "content_security_policy": "script-src 'self' https://apis.google.com; object-src 'self'"
 }
