@@ -152,4 +152,87 @@ newColForm.addEventListener("submit", (event) => {
 });
 
 
+// At the beginning of your file
+const signInButton = document.getElementById('signin');
+let isSignedIn = false;
 
+// Function to check sign-in status
+function checkSignInStatus() {
+  chrome.identity.getAuthToken({ interactive: false }, function(token) {
+    if (chrome.runtime.lastError) {
+      console.log('Not signed in');
+      updateSignInButton(false);
+    } else {
+      console.log('Signed in');
+      isSignedIn = true;
+      updateSignInButton(true);
+      fetchUserInfo(token);
+    }
+  });
+}
+
+// Function to update button text and functionality
+function updateSignInButton(signedIn) {
+  if (signedIn) {
+    signInButton.textContent = 'Sign out';
+    signInButton.removeEventListener('click', signIn);
+    signInButton.addEventListener('click', signOut);
+  } else {
+    signInButton.textContent = 'Sign in with Google';
+    signInButton.removeEventListener('click', signOut);
+    signInButton.addEventListener('click', signIn);
+  }
+}
+
+// Modified sign-in function
+function signIn() {
+  chrome.identity.getAuthToken({ interactive: true }, function(token) {
+    if (chrome.runtime.lastError) {
+      console.error(chrome.runtime.lastError);
+    } else {
+      console.log('Signed in successfully. Token:', token);
+      isSignedIn = true;
+      updateSignInButton(true);
+      fetchUserInfo(token);
+    }
+  });
+}
+
+// New sign-out function
+function signOut() {
+  chrome.identity.getAuthToken({ interactive: false }, function(token) {
+    if (!chrome.runtime.lastError) {
+      // Revoke token
+      fetch(`https://accounts.google.com/o/oauth2/revoke?token=${token}`)
+        .then(() => {
+          chrome.identity.removeCachedAuthToken({ token: token }, function() {
+            console.log('Signed out successfully');
+            isSignedIn = false;
+            updateSignInButton(false);
+          });
+        })
+        .catch(error => console.error('Error revoking token:', error));
+    }
+  });
+}
+
+// Function to fetch user info (unchanged)
+function fetchUserInfo(token) {
+  fetch('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
+    headers: {
+      Authorization: 'Bearer ' + token
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('User info:', data);
+    // Here you can update your UI with the user's information
+  })
+  .catch(error => console.error('Error fetching user info:', error));
+}
+
+// Call this function when the extension loads
+document.addEventListener('DOMContentLoaded', checkSignInStatus);
+
+// Remove the old event listener
+// signInButton.addEventListener('click', signIn);

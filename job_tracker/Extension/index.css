@@ -209,3 +209,9 @@ button#new-column-submit {
 input {
     padding: 10px;
 }
+
+#signin {
+    padding: 5px;
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
