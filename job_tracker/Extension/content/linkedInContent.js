@@ -1,3 +1,5 @@
+console.log("running linkedin");
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'extractJobData') {
             let c = document.querySelector(".details.mx-details-container-padding");

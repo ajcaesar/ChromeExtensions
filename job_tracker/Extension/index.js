@@ -30,17 +30,6 @@ const downloadBtn = document.getElementById("download-csv");
 const possibleUrls1 = ['glassdoor.com/job-listing', 'glassdoor.com/Job', 'indeed.com/viewjob', 'indeed.com/jobs', 
     'linkedin.com/jobs/view', 'ziprecruiter.com/jobs', 'ziprecruiter.com/ojob']
 
-const possibleUrls = [
-    { regex: /linkedin\.com\/jobs\/view/, script: 'content/linkedinContent.js' },
-    { regex: /glassdoor\.com\/job-listing/, script: 'content/glassdoorContent.js' },
-    { regex: /glassdoor\.com\/Job/, script: 'content/glassdoorContent.js' },
-    { regex: /indeed\.com\/viewjob/, script: 'content/indeedContent.js' },
-    { regex: /indeed\.com\/jobs/, script: 'content/indeedContent.js' },
-    { regex: /ziprecruiter\.com\/jobs/, script: 'content/zipRecruiterContent.js' },
-    { regex: /ziprecruiter\.com\/ojob/, script: 'content/zipRecruiterContent.js' }
-];
-    
-
 function setInputs() {
     colInputs = localStorage.getItem("colInputs") ? JSON.parse(localStorage.getItem("colInputs")) : {};
     let allInputs = document.querySelectorAll(".addedContainer");
@@ -111,28 +100,55 @@ function setCurrentTabUrl() {
     setWidths();
 }
 
-function injectContentScript(url, tabId) {
+const possibleUrls = [
+    { regex: /linkedin\.com\/jobs\/view/, script: 'content/linkedinContent.js' },
+    { regex: /glassdoor\.com\/job-listing/, script: 'content/glassdoorContent.js' },
+    { regex: /glassdoor\.com\/Job/, script: 'content/glassdoorContent.js' },
+    { regex: /indeed\.com\/viewjob/, script: 'content/indeedContent.js' },
+    { regex: /indeed\.com\/jobs/, script: 'content/indeedContent.js' },
+    { regex: /ziprecruiter\.com\/jobs/, script: 'content/zipRecruiterContent.js' },
+    { regex: /ziprecruiter\.com\/ojob/, script: 'content/zipRecruiterContent.js' }
+  ];
+  
+  function injectContentScript(url, tabId) {
     const match = possibleUrls.find(obj => obj.regex.test(url));
     if (match) {
-        chrome.tabs.executeScript(tabId, { file: match.script }, () => {
-            chrome.tabs.sendMessage(tabId, { action: 'extractJobData' }, (response) => {
-                if (response) {
-                    // Your existing code to handle the response
-                    colNames = Object.keys(response);
-                    totalCols = [...colNames];
-                    localStorage.setItem("colNames", JSON.stringify(colNames));
-                    localStorage.setItem("totalCols", JSON.stringify(totalCols));
-                    colInputs = Object.assign({}, response);
-                    colInputs['url'] = `"${url}"`;
-                    localStorage.setItem("colInputs", JSON.stringify(colInputs));
-                    renderNames();
-                }
-            });
+      chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: [match.script]
+      }, () => {
+        chrome.tabs.sendMessage(tabId, { action: 'extractJobData' }, (response) => {
+          if (response) {
+            console.log('Job data extracted:', response); // Debugging output
+            colNames = Object.keys(response);
+            totalCols = [...colNames];
+            localStorage.setItem("colNames", JSON.stringify(colNames));
+            localStorage.setItem("totalCols", JSON.stringify(totalCols));
+            colInputs = Object.assign({}, response);
+            colInputs['url'] = `"${url}"`;
+            localStorage.setItem("colInputs", JSON.stringify(colInputs));
+            renderNames();
+          } else {
+            console.error('No response received from content script'); // Error handling
+          }
         });
+      });
     } else {
-        alert('Not a valid job listing page.');
+      alert('Not a valid job listing page.');
     }
-}
+  }
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    setCurrentTabUrl();
+    urlInputBtn.addEventListener('click', setCurrentTabUrl);
+    autoFill.addEventListener('click', () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const activeTab = tabs[0];
+        injectContentScript(activeTab.url, activeTab.id);
+      });
+    });
+  });
+  
 
 autoFill.addEventListener("click", () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {

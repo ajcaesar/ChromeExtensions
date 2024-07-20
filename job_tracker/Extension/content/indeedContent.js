@@ -1,3 +1,5 @@
+console.log("running indeed");
+
 // indeedContent.js
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'extractJobData') {

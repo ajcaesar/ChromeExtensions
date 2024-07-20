@@ -1,3 +1,4 @@
+console.log("running glassdoor");
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'extractJobData') {
         let c = document.querySelector(".JobDetails_jobDetailsContainer__y9P3L");
