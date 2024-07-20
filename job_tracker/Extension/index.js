@@ -11,16 +11,21 @@ let colWidths = JSON.parse(localStorage.getItem("colWidths")) || {};
 
 let urlInput = document.getElementById("site-link");
 const urlInputBtn = document.getElementById("input-url-in");
+const saveLinkBtn = document.getElementById("save-link");
+const downloadBtn = document.getElementById("download-csv");
 
 function setInputs() {
-   colInputs = JSON.parse(localStorage.getItem("colInputs")) || {};
-   let allInputs =  document.querySelectorAll(".addedContainer");
-   for (let input of allInputs) {
+    colInputs = JSON.parse(localStorage.getItem("colInputs")) || {};
+    let allInputs = document.querySelectorAll(".addedContainer");
+    for (let input of allInputs) {
         let lab = colInputs[input.querySelector('.column-label').textContent];
-        if(lab) {
+        if (lab) {
             input.querySelector(".column-input").value = lab;
         }
-   }
+    }
+    if (colInputs['url']) {
+        urlInput.value = colInputs['url'];
+    }
 }
 
 function setWidths() {
@@ -38,40 +43,31 @@ function handleResize(entries) {
     for (let entry of entries) {
         let container = entry.target;
         let label = container.querySelector('.column-label').textContent;
-        let width = container.getBoundingClientRect().width + 'px'; // Ensure we get the width in pixels
+        let width = container.getBoundingClientRect().width + 'px';
         colWidths[label] = width;
         localStorage.setItem("colWidths", JSON.stringify(colWidths));
         console.log(`Updated width for ${label}: ${width}`);
     }
 }
 
-// Function to get and set the current tab's URL
 function setCurrentTabUrl() {
-    // Check if Chrome API is available
-    if (chrome && chrome.tabs) {
-        console.log('set in place');
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            if (tabs[0] && tabs[0].url) {
-                urlInput.value = tabs[0].url;
-            }
-        });
-    } else {
-        console.log("Chrome API not available. Are you testing in a browser?");
-    }
+    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+        urlInput.value = tabs[0].url;
+                colInputs['url'] = tabs[0].url;
+                localStorage.setItem("colInputs", JSON.stringify(colInputs));
+    });
     renderNames();
     setInputs();
     setWidths();
 }
 
-
-// ... rest of your code
 const removeCol = (event) => {
     const targetElement = event.target.closest('.container');
     const labelElement = targetElement.querySelector('.column-label');
     const colName = labelElement.textContent;
     colNames = colNames.filter(name => name !== colName);
     localStorage.setItem("colNames", JSON.stringify(colNames));
-    delete colInputs.colName;
+    delete colInputs[colName];
     localStorage.setItem("colInputs", JSON.stringify(colInputs));
     delete colWidths[colName];
     localStorage.setItem("colWidths", JSON.stringify(colWidths));
@@ -114,9 +110,50 @@ const addInput = (event) => {
     localStorage.setItem("colInputs", JSON.stringify(colInputs));
 }
 
-const saveToSpreadsheet = (event) => {
-    return;
-}
+const saveToCSV = () => {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    let headers = ["Column", "Input"];
+    let rows = [["url", colInputs["url"] || ""]]; // Include URL row
+
+    colNames.forEach(col => {
+        rows.push([col, colInputs[col] || ""]);
+    });
+
+    csvContent += headers.join(",") + "\n";
+    rows.forEach(row => {
+        csvContent += row.join(",") + "\n";
+    });
+
+    localStorage.setItem("csvData", csvContent);
+    console.log("CSV saved to localStorage");
+
+    // Clear inputs after saving
+    colNames.forEach(col => {
+        colInputs[col] = "";
+    });
+    colInputs["url"] = "";
+    localStorage.setItem("colInputs", JSON.stringify(colInputs));
+    renderNames();
+};
+
+const downloadCSV = () => {
+    let csvContent = localStorage.getItem("csvData");
+    if (!csvContent) {
+        console.log("No CSV data found in localStorage");
+        return;
+    }
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "data.csv");
+    document.body.appendChild(link); // Required for FF
+    link.click(); // This will download the data file named "data.csv"
+    document.body.removeChild(link);
+};
+
+saveLinkBtn.addEventListener('click', saveToCSV);
+downloadBtn.addEventListener('click', downloadCSV);
 
 // Set URL when the extension loads
 document.addEventListener('DOMContentLoaded', setCurrentTabUrl);
@@ -151,88 +188,8 @@ newColForm.addEventListener("submit", (event) => {
     renderNames();
 });
 
+document.getElementById("clear-csv").addEventListener("click", ()=> {
+    localStorage.setItem("csvData", "");
+});
 
-// At the beginning of your file
-const signInButton = document.getElementById('signin');
-let isSignedIn = false;
 
-// Function to check sign-in status
-function checkSignInStatus() {
-  chrome.identity.getAuthToken({ interactive: false }, function(token) {
-    if (chrome.runtime.lastError) {
-      console.log('Not signed in');
-      updateSignInButton(false);
-    } else {
-      console.log('Signed in');
-      isSignedIn = true;
-      updateSignInButton(true);
-      fetchUserInfo(token);
-    }
-  });
-}
-
-// Function to update button text and functionality
-function updateSignInButton(signedIn) {
-  if (signedIn) {
-    signInButton.textContent = 'Sign out';
-    signInButton.removeEventListener('click', signIn);
-    signInButton.addEventListener('click', signOut);
-  } else {
-    signInButton.textContent = 'Sign in with Google';
-    signInButton.removeEventListener('click', signOut);
-    signInButton.addEventListener('click', signIn);
-  }
-}
-
-// Modified sign-in function
-function signIn() {
-  chrome.identity.getAuthToken({ interactive: true }, function(token) {
-    if (chrome.runtime.lastError) {
-      console.error(chrome.runtime.lastError);
-    } else {
-      console.log('Signed in successfully. Token:', token);
-      isSignedIn = true;
-      updateSignInButton(true);
-      fetchUserInfo(token);
-    }
-  });
-}
-
-// New sign-out function
-function signOut() {
-  chrome.identity.getAuthToken({ interactive: false }, function(token) {
-    if (!chrome.runtime.lastError) {
-      // Revoke token
-      fetch(`https://accounts.google.com/o/oauth2/revoke?token=${token}`)
-        .then(() => {
-          chrome.identity.removeCachedAuthToken({ token: token }, function() {
-            console.log('Signed out successfully');
-            isSignedIn = false;
-            updateSignInButton(false);
-          });
-        })
-        .catch(error => console.error('Error revoking token:', error));
-    }
-  });
-}
-
-// Function to fetch user info (unchanged)
-function fetchUserInfo(token) {
-  fetch('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
-    headers: {
-      Authorization: 'Bearer ' + token
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    console.log('User info:', data);
-    // Here you can update your UI with the user's information
-  })
-  .catch(error => console.error('Error fetching user info:', error));
-}
-
-// Call this function when the extension loads
-document.addEventListener('DOMContentLoaded', checkSignInStatus);
-
-// Remove the old event listener
-// signInButton.addEventListener('click', signIn);
