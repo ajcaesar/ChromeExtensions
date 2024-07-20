@@ -1,58 +1,26 @@
-export default function extractIndeed() {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const activeTab = tabs[0];
-      if (activeTab.url.includes('indeed.com/viewjob') || activeTab.url.includes('indeed.com/jobs')) {
-        chrome.tabs.sendMessage(activeTab.id, { action: 'extractJobData' }, (response) => {
-          if (response) {
-            let c = document.querySelector(".jobsearch-JobComponent");
-  
-            function getTextContent(selector) {
-              const element = c.querySelector(selector);
-              return element ? element.textContent.trim() : '';
-            }
-  
-            // Extract the job title, company name, location, and pay range
-            const jobTitle = getTextContent('.jobsearch-JobInfoHeader-title');
-            const companyName = getTextContent('[data-testid="inlineHeader-companyName"]');
-            const location = getTextContent('[data-testid="inlineHeader-companyLocation"]');
-            const payRange = getTextContent('#salaryInfoAndJobType .css-19j1a75');
-  
-            // // Extract the job overview and description
-            // const jobOverview = getTextContent('#jobDescriptionTitleHeading');
-            // const jobDescription = Array.from(c.querySelectorAll('#jobDescriptionText p'))
-            //   .map(p => p.textContent.trim())
-            //   .join(' ');
-  
-            // // Extract the principal duties and responsibilities, and qualifications
-            // const duties = Array.from(c.querySelectorAll('#jobDescriptionText ul:nth-of-type(1) li'))
-            //   .map(li => li.textContent.trim());
-            // const qualifications = Array.from(c.querySelectorAll('#jobDescriptionText ul:nth-of-type(2) li'))
-            //   .map(li => li.textContent.trim());
-  
-            // // Extract the required and preferred skills
-            // const requiredSkills = Array.from(c.querySelectorAll('#jobDescriptionText ul:nth-of-type(3) li'))
-            //   .map(li => li.textContent.trim());
-            // const preferredSkills = Array.from(c.querySelectorAll('#jobDescriptionText ul:nth-of-type(4) li'))
-            //   .map(li => li.textContent.trim());
-  
-            // Create a job details object
-            const jobDetails = {
-              jobTitle,
-              companyName,
-              location,
-              payRange,
-            };
-  
-            // Output the job details object to the console
-            console.log(jobDetails);
-  
-            // Optionally return the job details object if needed for further processing
-            return jobDetails;
-          }
-        });
-      } else {
-        alert('Not a valid page. Must be a /viewjob or /jobs page');
-      }
-    });
-  }
-  
+// indeedContent.js
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'extractJobData') {
+        let c = document.querySelector(".jobsearch-JobComponent");
+
+        function getTextContent(selector) {
+            const element = c.querySelector(selector);
+            return element ? element.textContent.trim() : '';
+        }
+
+        const jobTitle = getTextContent('.jobsearch-JobInfoHeader-title');
+        const companyName = getTextContent('[data-testid="inlineHeader-companyName"]');
+        const location = getTextContent('[data-testid="inlineHeader-companyLocation"]');
+        const payRange = getTextContent('#salaryInfoAndJobType .css-19j1a75');
+
+        const jobDetails = {
+            jobTitle,
+            companyName,
+            location,
+            payRange,
+        };
+
+        sendResponse(jobDetails);
+    }
+    return true;
+});

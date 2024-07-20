@@ -1,3 +1,32 @@
+// indeedContent.js
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'extractJobData') {
+
+      function getTextContent(selector) {
+          const element = document.querySelector(selector);
+          return element ? element.textContent.trim() : '';
+      }
+
+      const jobTitle = getTextContent('.job-title');
+      const companyName = getTextContent('.hiring-company"]');
+      const location = getTextContent('.hiring-location"]');
+      const payRange = getTextContent('.t_compensation');
+
+      const jobDetails = {
+          jobTitle,
+          companyName,
+          location,
+          payRange,
+      };
+
+      sendResponse(jobDetails);
+  }
+  return true;
+});
+
+
+
+
 // Add this function to your index.js file
 export default function extractZipRecruiter() {
     let jb = {};
@@ -6,8 +35,6 @@ export default function extractZipRecruiter() {
       if (activeTab.url.includes('ziprecruiter.com/jobs') || activeTab.url.includes('ziprecruiter.com/ojob')) {
         chrome.tabs.sendMessage(activeTab.id, {action: 'extractJobData'}, (response) => {
           if (response) {
-            // Populate form fields with extracted data
-            document.getElementById('site-link').value = activeTab.url;
             
             // Assuming you have input fields for these job details
             if (document.querySelector('.job-title')) {

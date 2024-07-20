@@ -1,9 +1,5 @@
-export default function extractLinkedIn() {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const activeTab = tabs[0];
-      if (activeTab.url.includes('linkedin.com/jobs/view')){
-        chrome.tabs.sendMessage(activeTab.id, { action: 'extractJobData' }, (response) => {
-          if (response) {
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'extractJobData') {
             let c = document.querySelector(".details.mx-details-container-padding");
   
             function getTextContent(selector) {
@@ -47,12 +43,8 @@ export default function extractLinkedIn() {
             console.log(jobDetails);
   
             // Optionally return the job details object if needed for further processing
-            return jobDetails;
+            sendResponse(jobDetails);
           }
+          return true;
         });
-      } else {
-        alert('Not a valid page. Must be a /jobs/view page');
-      }
-    });
-  }
   

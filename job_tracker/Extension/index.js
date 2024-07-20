@@ -1,10 +1,3 @@
-import extractGlassdoor from './content/glassdoorContent.js';
-import extractIndeed from './content/indeedContent.js';
-import extractLinkedIn from './content/linkedInContent.js';
-import extractZipRecruiter from './content/zipRecruiterContent.js';
-
-
-// Now you can use the imported modules as needed
 
 const addColButton = document.getElementById("add-section");
 const overlay = document.getElementById("overlay");
@@ -34,8 +27,19 @@ const urlInputBtn = document.getElementById("input-url-in");
 const saveLinkBtn = document.getElementById("save-link");
 const downloadBtn = document.getElementById("download-csv");
 
-const possibleUrls = ['glassdoor.com/job-listing', 'glassdoor.com/Job', 'indeed.com/viewjob', 'indeed.com/jobs', 
+const possibleUrls1 = ['glassdoor.com/job-listing', 'glassdoor.com/Job', 'indeed.com/viewjob', 'indeed.com/jobs', 
     'linkedin.com/jobs/view', 'ziprecruiter.com/jobs', 'ziprecruiter.com/ojob']
+
+const possibleUrls = [
+    { regex: /linkedin\.com\/jobs\/view/, script: 'content/linkedinContent.js' },
+    { regex: /glassdoor\.com\/job-listing/, script: 'content/glassdoorContent.js' },
+    { regex: /glassdoor\.com\/Job/, script: 'content/glassdoorContent.js' },
+    { regex: /indeed\.com\/viewjob/, script: 'content/indeedContent.js' },
+    { regex: /indeed\.com\/jobs/, script: 'content/indeedContent.js' },
+    { regex: /ziprecruiter\.com\/jobs/, script: 'content/zipRecruiterContent.js' },
+    { regex: /ziprecruiter\.com\/ojob/, script: 'content/zipRecruiterContent.js' }
+];
+    
 
 function setInputs() {
     colInputs = localStorage.getItem("colInputs") ? JSON.parse(localStorage.getItem("colInputs")) : {};
@@ -94,7 +98,7 @@ function setCurrentTabUrl() {
         const sanitizedUrl = `"${tabs[0].url}"`;
         colInputs['url'] = sanitizedUrl;
         localStorage.setItem("colInputs", JSON.stringify(colInputs));
-        if (possibleUrls.some(substring => sanitizedUrl.includes(substring))) {
+        if (possibleUrls1.some(substring => sanitizedUrl.includes(substring))) {
             autoFill.style.display = "block";
             autoFill.className = extractTargetInfo(sanitizedUrl);
         }
@@ -107,39 +111,35 @@ function setCurrentTabUrl() {
     setWidths();
 }
 
+function injectContentScript(url, tabId) {
+    const match = possibleUrls.find(obj => obj.regex.test(url));
+    if (match) {
+        chrome.tabs.executeScript(tabId, { file: match.script }, () => {
+            chrome.tabs.sendMessage(tabId, { action: 'extractJobData' }, (response) => {
+                if (response) {
+                    // Your existing code to handle the response
+                    colNames = Object.keys(response);
+                    totalCols = [...colNames];
+                    localStorage.setItem("colNames", JSON.stringify(colNames));
+                    localStorage.setItem("totalCols", JSON.stringify(totalCols));
+                    colInputs = Object.assign({}, response);
+                    colInputs['url'] = `"${url}"`;
+                    localStorage.setItem("colInputs", JSON.stringify(colInputs));
+                    renderNames();
+                }
+            });
+        });
+    } else {
+        alert('Not a valid job listing page.');
+    }
+}
 
 autoFill.addEventListener("click", () => {
-    if (autoFill.classList.contains("ziprecruiter")) {
-        let obj = extractZipRecruiter();
-    }
-    else if (autoFill.classList.contains("linkedin")) {
-        let obj = extractLinkedIn();
-    }
-    else if (autoFill.classList.contains("glassdoor")) {
-        let obj = extractGlassdoor();
-    }
-    else if (autoFill.classList.contains("indeed")) {
-        let obj = extractIndeed();
-    }
-    console.log("clicked here");
-    console.log(obj);
-    
-    colNames = [];
-
-    for (let key in obj) {
-        colNames.push(key);
-        totalCols.push(key);
-    }
-
-    localStorage.setItem("colNames", JSON.stringify(colNames));
-    localStorage.setItem("totalCols", JSON.stringify(totalCols));
-    colInputs = Object.assign({}, obj);
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        urlInput.value = tabs[0].url;
-        const sanitizedUrl = `"${tabs[0].url}"`;
-        colInputs['url'] = sanitizedUrl;});
-    renderNames();
-})
+        const activeTab = tabs[0];
+        injectContentScript(activeTab.url, activeTab.id);
+    });
+});
 
 const removeCol = (event) => {
     const targetElement = event.target.closest('.container');

@@ -1,11 +1,30 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "version": "1.0",
   "name": "TrackUrJobs",
   "action": {
       "default_popup": "index.html",
       "default_icon": "icon.png"
   }, 
+
+  "content_scripts": [
+    {
+        "matches": ["https://*.indeed.com/*"],
+        "js": ["content/indeedContent.js"]
+    },
+    {
+        "matches": ["https://*.glassdoor.com/*"],
+        "js": ["content/glassdoorContent.js"]
+    },
+    {
+        "matches": ["https://*.linkedin.com/*"],
+        "js": ["content/linkedinContent.js"]
+    },
+    {
+        "matches": ["https://*.ziprecruiter.com/*"],
+        "js": ["content/zipRecruiterContent.js"]
+    }
+],
   "permissions": [
       "tabs"
   ]
