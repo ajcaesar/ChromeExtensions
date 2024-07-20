@@ -101,7 +101,7 @@ function setCurrentTabUrl() {
 }
 
 const possibleUrls = [
-    { regex: /linkedin\.com\/jobs\/view/, script: 'content/linkedinContent.js' },
+    { regex: /linkedin\.com\/jobs\/view/, script: 'content/linkedInContent.js' },
     { regex: /glassdoor\.com\/job-listing/, script: 'content/glassdoorContent.js' },
     { regex: /glassdoor\.com\/Job/, script: 'content/glassdoorContent.js' },
     { regex: /indeed\.com\/viewjob/, script: 'content/indeedContent.js' },
@@ -113,12 +113,13 @@ const possibleUrls = [
   function injectContentScript(url, tabId) {
     const match = possibleUrls.find(obj => obj.regex.test(url));
     if (match) {
+      console.log(match.script);
       chrome.scripting.executeScript({
         target: { tabId: tabId },
         files: [match.script]
       }, () => {
         chrome.tabs.sendMessage(tabId, { action: 'extractJobData' }, (response) => {
-          if (response) {
+            if (response) {
             console.log('Job data extracted:', response); // Debugging output
             colNames = Object.keys(response);
             totalCols = [...colNames];
@@ -141,21 +142,17 @@ const possibleUrls = [
   document.addEventListener('DOMContentLoaded', () => {
     setCurrentTabUrl();
     urlInputBtn.addEventListener('click', setCurrentTabUrl);
-    autoFill.addEventListener('click', () => {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const activeTab = tabs[0];
-        injectContentScript(activeTab.url, activeTab.id);
-      });
+    autoFill.addEventListener("click", () => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            const activeTab = tabs[0];
+            injectContentScript(activeTab.url, activeTab.id);
+        });
     });
+    // chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    // const activeTab = tabs[0];
+    // injectContentScript(activeTab.url, activeTab.id);
+    // });
   });
-  
-
-autoFill.addEventListener("click", () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const activeTab = tabs[0];
-        injectContentScript(activeTab.url, activeTab.id);
-    });
-});
 
 const removeCol = (event) => {
     const targetElement = event.target.closest('.container');

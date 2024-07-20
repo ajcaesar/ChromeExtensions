@@ -1,7 +1,7 @@
-console.log("running ziprecruiter");
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'extractJobData') {
+      console.log('executing zipr');
       const c = document.querySelector(".JobDetails_jobDetailsContainer__y9P3L");
 
       function getTextContent(selector) {
@@ -23,6 +23,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
       console.log(jobDetails); // Debugging output
       sendResponse(jobDetails); // Send the job details object back to the background or popup script
+  }
+  else {
+    console.log("not executing")
   }
   return true;
 });
