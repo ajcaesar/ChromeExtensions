@@ -2,17 +2,17 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'extractJobData') {
       console.log('executing zipr');
-      const c = document.querySelector(".JobDetails_jobDetailsContainer__y9P3L");
+      const c = document.querySelector(".job_details_tile");
 
       function getTextContent(selector) {
           const element = c.querySelector(selector);
           return element ? element.textContent.trim() : '';
       }
 
-      const jobTitle = getTextContent('.heading_Level1__soLZs');
-      const companyName = getTextContent('.EmployerProfile_employerInfo__d8uSE h4');
-      const location = getTextContent('.JobDetails_location__mSg5h');
-      const payRange = getTextContent('.SalaryEstimate_salaryRange__brHFy');
+      const jobTitle = getTextContent('.job_title');
+      const companyName = getTextContent('.hiring_company');
+      const location = getTextContent('.hiring_location');
+      const payRange = getTextContent('.t_compensation');
 
       const jobDetails = {
           jobTitle,
@@ -24,8 +24,4 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.log(jobDetails); // Debugging output
       sendResponse(jobDetails); // Send the job details object back to the background or popup script
   }
-  else {
-    console.log("not executing")
-  }
-  return true;
 });

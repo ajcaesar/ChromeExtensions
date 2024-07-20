@@ -148,10 +148,10 @@ const possibleUrls = [
             injectContentScript(activeTab.url, activeTab.id);
         });
     });
-    // chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    // const activeTab = tabs[0];
-    // injectContentScript(activeTab.url, activeTab.id);
-    // });
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const activeTab = tabs[0];
+    injectContentScript(activeTab.url, activeTab.id);
+    });
   });
 
 const removeCol = (event) => {

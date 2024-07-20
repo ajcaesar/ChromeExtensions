@@ -24,5 +24,4 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         sendResponse(jobDetails);
     }
-    return true;
 });

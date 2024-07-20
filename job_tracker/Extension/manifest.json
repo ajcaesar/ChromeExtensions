@@ -13,9 +13,13 @@
   ],
   "host_permissions": [
     "https://*.indeed.com/*",
+    "indeed.com/*",
     "https://*.glassdoor.com/*",
+    "glassdoor.com/*",
     "https://*.linkedin.com/*",
-    "https://*.ziprecruiter.com/*"
+    "linkedin.com/*",
+    "https://*.ziprecruiter.com/*",
+    "ziprecruiter.com/*"
   ],
   "content_scripts": [
     {
