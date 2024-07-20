@@ -12,7 +12,7 @@ let colNames = localStorage.getItem("colNames") ? JSON.parse(localStorage.getIte
 let colInputs = localStorage.getItem("colInputs") ? JSON.parse(localStorage.getItem("colInputs")) : {};
 let colWidths = localStorage.getItem("colWidths") ? JSON.parse(localStorage.getItem("colWidths")) : {};
 let items = localStorage.getItem("total-items") ? JSON.parse(localStorage.getItem("total-items")) : [];
-let totalCols = localStorage.getItem("totalCols") ? JSON.parse(localStorage.getItem("totalCols")) : colNames;
+let totalCols = localStorage.getItem("totalCols") ? JSON.parse(localStorage.getItem("totalCols")) : [...colNames];
 let numItems = localStorage.getItem("numItems") ? JSON.parse(localStorage.getItem("numItems")) : 0;
 
 let numItemsInput = document.getElementById("num-items");
@@ -145,16 +145,13 @@ const saveToCSV = () => {
     for (let r of c) {
         let i = r.querySelector(".column-label").textContent;
         while (i !== totalCols[count].trim()) {
-            // console.log("colName: 3" + colNames[count] + "3 "
-            // );
-            // console.log("i: 3" + i + "3");
             arr.push("");
             count += 1;
         }
         arr.push(escapeCSV(r.querySelector(".column-input").value) || "");
         count += 1;
     }
-    items.push(arr.join(","));
+    items.push(arr);
     localStorage.setItem("total-items", JSON.stringify(items));
 
     // Clear inputs after saving
@@ -173,10 +170,28 @@ const downloadCSV = (event) => {
     event.preventDefault();
     let csvContent = "data:text/csv;charset=utf-8,";
     let headers = totalCols;
+    headers.unshift("url")
+    let filled = new Array(headers.length).fill(false);
+
+    for (let x of items) {
+        for (let i=0; i < x.length; i++) {
+            if(x[i].trim().length > 0) {
+                filled[i] = true;
+            }
+        }
+    }
+
+    let filteredItems = items.map(row => 
+        row.filter((_, index) => filled[index])
+    );
+
+    // Filter out empty columns from headers
+    let filteredHeaders = headers.filter((_, index) => filled[index]);
+
+    csvContent += filteredHeaders.join(",") + "\n";
     
-    csvContent += "url," + headers.join(",") + "\n";
-    items.forEach(row => {
-        csvContent += row + "\n";
+    filteredItems.forEach(row => {
+        csvContent += row.join(",") + "\n";
     });
 
     if (!csvContent) {
@@ -191,6 +206,11 @@ const downloadCSV = (event) => {
     document.body.appendChild(link); // Required for FF
     link.click(); // This will download the data file named "data.csv"
     document.body.removeChild(link);
+    items = filteredItems;
+    filteredHeaders.shift();
+    totalCols = filteredHeaders;
+    localStorage.setItem("totalCols", JSON.stringify(totalCols));
+    localStorage.setItem("total-items", JSON.stringify(items));
 };
 
 saveLinkBtn.addEventListener('click', saveToCSV);
