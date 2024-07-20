@@ -12,9 +12,8 @@ let colNames = localStorage.getItem("colNames") ? JSON.parse(localStorage.getIte
 let colInputs = localStorage.getItem("colInputs") ? JSON.parse(localStorage.getItem("colInputs")) : {};
 let colWidths = localStorage.getItem("colWidths") ? JSON.parse(localStorage.getItem("colWidths")) : {};
 let items = localStorage.getItem("total-items") ? JSON.parse(localStorage.getItem("total-items")) : [];
-let totalCols = localStorage.getItem("totalCols") ? JSON.parse(localStorage.getItem("totalCols")) : [];
+let totalCols = localStorage.getItem("totalCols") ? JSON.parse(localStorage.getItem("totalCols")) : colNames;
 let numItems = localStorage.getItem("numItems") ? JSON.parse(localStorage.getItem("numItems")) : 0;
-
 
 let numItemsInput = document.getElementById("num-items");
 
@@ -57,7 +56,7 @@ function handleResize(entries) {
         let width = container.getBoundingClientRect().width + 'px';
         colWidths[label] = width;
         localStorage.setItem("colWidths", JSON.stringify(colWidths));
-        console.log(`Updated width for ${label}: ${width}`);
+        // console.log(`Updated width for ${label}: ${width}`);
     }
 }
 
@@ -103,9 +102,9 @@ const renderNames = () => {
     }
     inputs.innerHTML = str;
     containers = document.querySelectorAll(".addedContainer");
-    for (let container of containers) {
-        container.querySelector(".column-input").addEventListener("input", addInput);
-        new ResizeObserver(handleResize).observe(container);
+    for (let container1 of containers) {
+        container1.querySelector(".column-input").addEventListener("input", addInput);
+        new ResizeObserver(handleResize).observe(container1);
     }
     delButtons = document.querySelectorAll(".col-del-button");
     urlInput = document.getElementById("site-link");
@@ -145,9 +144,10 @@ const saveToCSV = () => {
     let count = 0;
     for (let r of c) {
         let i = r.querySelector(".column-label").textContent;
-        while (i !== totalCols[count]) {
-            console.log("colName: " + colNames[count]);
-            console.log("i: " + i);
+        while (i !== totalCols[count].trim()) {
+            // console.log("colName: 3" + colNames[count] + "3 "
+            // );
+            // console.log("i: 3" + i + "3");
             arr.push("");
             count += 1;
         }
@@ -238,9 +238,10 @@ newColForm.addEventListener("submit", (event) => {
 });
 
 document.getElementById("clear-csv").addEventListener("click", ()=> {
+    items = [];
     localStorage.setItem("total-items", JSON.stringify([]));
-    totalCols = colNames;
-    localStorage.setItem("totalCols", JSON.stringify([]));
+    totalCols = [...colNames];
+    localStorage.setItem("totalCols", JSON.stringify(totalCols));
     numItemsInput.textContent = "0 jobs saved";
     numItems = 0;
     localStorage.setItem("numItems", JSON.stringify(0));
