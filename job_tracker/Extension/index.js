@@ -5,6 +5,9 @@ const newColDel = document.getElementById("new-col-del");
 const inputs = document.getElementById("all-inputs");
 let delButtons = document.querySelectorAll(".col-del-button");
 
+const csvForm = document.getElementById("csv-title");
+const csvDel = document.getElementById("csv-del");
+
 let colNames = JSON.parse(localStorage.getItem("colNames")) || [];
 let colInputs = JSON.parse(localStorage.getItem("colInputs")) || {};
 let colWidths = JSON.parse(localStorage.getItem("colWidths")) || {};
@@ -51,10 +54,11 @@ function handleResize(entries) {
 }
 
 function setCurrentTabUrl() {
-    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         urlInput.value = tabs[0].url;
-                colInputs['url'] = tabs[0].url;
-                localStorage.setItem("colInputs", JSON.stringify(colInputs));
+        const sanitizedUrl = `"${tabs[0].url}"`;
+        colInputs['url'] = sanitizedUrl;
+        localStorage.setItem("colInputs", JSON.stringify(colInputs));
     });
     renderNames();
     setInputs();
@@ -110,6 +114,12 @@ const addInput = (event) => {
     localStorage.setItem("colInputs", JSON.stringify(colInputs));
 }
 
+const csvInput = (event) => {
+    event.preventDefault();
+    csvForm.classList.toggle("hide");
+    overlay.classList.toggle("hide");
+}
+
 const saveToCSV = () => {
     let csvContent = "data:text/csv;charset=utf-8,";
     let headers = ["Column", "Input"];
@@ -142,18 +152,24 @@ const downloadCSV = () => {
         console.log("No CSV data found in localStorage");
         return;
     }
-
+    const csvTitle = document.getElementById("csv-title-input").value;
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "data.csv");
+    link.setAttribute("download", `${csvTitle}.csv`);
     document.body.appendChild(link); // Required for FF
     link.click(); // This will download the data file named "data.csv"
     document.body.removeChild(link);
 };
 
 saveLinkBtn.addEventListener('click', saveToCSV);
-downloadBtn.addEventListener('click', downloadCSV);
+downloadBtn.addEventListener('click', csvInput);
+csvForm.addEventListener("submit", downloadCSV)
+csvDel.addEventListener("click", (event) => {
+    event.preventDefault();
+    csvForm.classList.toggle("hide");
+    overlay.classList.toggle("hide");
+})
 
 // Set URL when the extension loads
 document.addEventListener('DOMContentLoaded', setCurrentTabUrl);

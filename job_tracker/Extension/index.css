@@ -126,16 +126,12 @@ h1 {
     padding: 2px 3px;
 }
 
-.new-column {
-    position: relative;
-}
-
 input {
     margin: 0;
     padding: 0;
 }
 
-#new-column {
+#new-column, #csv-title {
     position: relative;
     --width: max(50vw, 300px);
     width: var(--width);
@@ -153,7 +149,7 @@ input {
     z-index: 1001;
 }
 
-#new-column-input-text {
+#new-column-input-text, #csv-title-input {
     position: relative;
     width: 80%;
     height: 40px;
@@ -162,7 +158,7 @@ input {
     margin-bottom: 10px;
 }
 
-button#new-column-submit {
+button#new-column-submit, button#csv-title-submit {
     width: 50%;
     margin-left: 25%;
 }
@@ -175,7 +171,7 @@ button#new-column-submit {
     margin-right: 20px;
 }
 
-#bottom button, #new-column-submit {
+#bottom button, #new-column-submit, #csv-title-submit {
     width: max(20vw, 200px);
     padding: 5px;
     font-size: max(min(1rem, 25px), 16px);
@@ -214,5 +210,5 @@ input {
     padding: 5px;
     margin-left: 20px;
     margin-bottom: 10px;
-    margin-top: -5px;
+    margin-top: -10px;
 }
