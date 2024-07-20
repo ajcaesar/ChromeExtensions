@@ -51,7 +51,7 @@ export default function extractLinkedIn() {
           }
         });
       } else {
-        alert('Not a valid page. Must be a /viewjob or /jobs page');
+        alert('Not a valid page. Must be a /jobs/view page');
       }
     });
   }

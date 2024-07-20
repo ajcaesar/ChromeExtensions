@@ -1,5 +1,5 @@
 // Define the script that extracts job details from a Glassdoor job posting
-export default function extractIndeed(){
+export default function extractGlassdoor(){
 
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         const activeTab = tabs[0];
@@ -69,7 +69,7 @@ export default function extractIndeed(){
         return {};
     });
     } else {
-          alert('not a valid page. must be a /ojob or /jobs page');
+          alert('not a valid page. must be a /Job or /job-listing page');
         }
       });
     }

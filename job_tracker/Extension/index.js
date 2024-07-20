@@ -1,3 +1,11 @@
+import extractGlassdoor from './content/glassdoorContent.js';
+import extractIndeed from './content/indeedContent.js';
+import extractLinkedIn from './content/linkedInContent.js';
+import extractZipRecruiter from './content/zipRecruiterContent.js';
+
+
+// Now you can use the imported modules as needed
+
 const addColButton = document.getElementById("add-section");
 const overlay = document.getElementById("overlay");
 const newColForm = document.getElementById("new-column");
@@ -15,6 +23,8 @@ let items = localStorage.getItem("total-items") ? JSON.parse(localStorage.getIte
 let totalCols = localStorage.getItem("totalCols") ? JSON.parse(localStorage.getItem("totalCols")) : [...colNames];
 let numItems = localStorage.getItem("numItems") ? JSON.parse(localStorage.getItem("numItems")) : 0;
 
+let autoFill = document.getElementById("input-data-automatic");
+
 let numItemsInput = document.getElementById("num-items");
 
 numItemsInput.textContent =  numItems + " jobs saved";
@@ -23,6 +33,9 @@ let urlInput = document.getElementById("site-link");
 const urlInputBtn = document.getElementById("input-url-in");
 const saveLinkBtn = document.getElementById("save-link");
 const downloadBtn = document.getElementById("download-csv");
+
+const possibleUrls = ['glassdoor.com/job-listing', 'glassdoor.com/Job', 'indeed.com/viewjob', 'indeed.com/jobs', 
+    'linkedin.com/jobs/view', 'ziprecruiter.com/jobs', 'ziprecruiter.com/ojob']
 
 function setInputs() {
     colInputs = localStorage.getItem("colInputs") ? JSON.parse(localStorage.getItem("colInputs")) : {};
@@ -60,17 +73,73 @@ function handleResize(entries) {
     }
 }
 
+function extractTargetInfo(url) {
+    // Remove the protocol
+    let urlWithoutProtocol = url.replace(/(^\w+:|^)\/\//, '');
+    
+    // Find the part before '.com'
+    let partBeforeDotCom = urlWithoutProtocol.split('.com')[0];
+  
+    // Find the part after the last period before '.com'
+    let parts = partBeforeDotCom.split('.');
+    let targetInfo = parts.length > 1 ? parts[parts.length - 1] : parts[0];
+  
+    return targetInfo;
+  }
+  
+
 function setCurrentTabUrl() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         urlInput.value = tabs[0].url;
         const sanitizedUrl = `"${tabs[0].url}"`;
         colInputs['url'] = sanitizedUrl;
         localStorage.setItem("colInputs", JSON.stringify(colInputs));
+        if (possibleUrls.some(substring => sanitizedUrl.includes(substring))) {
+            autoFill.style.display = "block";
+            autoFill.className = extractTargetInfo(sanitizedUrl);
+        }
+        else {
+            autoFill.style.display = "none";
+        }
     });
     renderNames();
     setInputs();
     setWidths();
 }
+
+
+autoFill.addEventListener("click", () => {
+    if (autoFill.classList.contains("ziprecruiter")) {
+        let obj = extractZipRecruiter();
+    }
+    else if (autoFill.classList.contains("linkedin")) {
+        let obj = extractLinkedIn();
+    }
+    else if (autoFill.classList.contains("glassdoor")) {
+        let obj = extractGlassdoor();
+    }
+    else if (autoFill.classList.contains("indeed")) {
+        let obj = extractIndeed();
+    }
+    console.log("clicked here");
+    console.log(obj);
+    
+    colNames = [];
+
+    for (let key in obj) {
+        colNames.push(key);
+        totalCols.push(key);
+    }
+
+    localStorage.setItem("colNames", JSON.stringify(colNames));
+    localStorage.setItem("totalCols", JSON.stringify(totalCols));
+    colInputs = Object.assign({}, obj);
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        urlInput.value = tabs[0].url;
+        const sanitizedUrl = `"${tabs[0].url}"`;
+        colInputs['url'] = sanitizedUrl;});
+    renderNames();
+})
 
 const removeCol = (event) => {
     const targetElement = event.target.closest('.container');
