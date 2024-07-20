@@ -28,7 +28,7 @@
     },
     {
       "matches": ["https://*.linkedin.com/*"],
-      "js": ["content/linkedinContent.js"]
+      "js": ["content/linkedInContent.js"]
     },
     {
       "matches": ["https://*.ziprecruiter.com/*"],
