@@ -8,9 +8,17 @@ let delButtons = document.querySelectorAll(".col-del-button");
 const csvForm = document.getElementById("csv-title");
 const csvDel = document.getElementById("csv-del");
 
-let colNames = JSON.parse(localStorage.getItem("colNames")) || [];
-let colInputs = JSON.parse(localStorage.getItem("colInputs")) || {};
-let colWidths = JSON.parse(localStorage.getItem("colWidths")) || {};
+let colNames = localStorage.getItem("colNames") ? JSON.parse(localStorage.getItem("colNames")) : [];
+let colInputs = localStorage.getItem("colInputs") ? JSON.parse(localStorage.getItem("colInputs")) : {};
+let colWidths = localStorage.getItem("colWidths") ? JSON.parse(localStorage.getItem("colWidths")) : {};
+let items = localStorage.getItem("total-items") ? JSON.parse(localStorage.getItem("total-items")) : [];
+let totalCols = localStorage.getItem("totalCols") ? JSON.parse(localStorage.getItem("totalCols")) : [];
+let numItems = localStorage.getItem("numItems") ? JSON.parse(localStorage.getItem("numItems")) : 0;
+
+
+let numItemsInput = document.getElementById("num-items");
+
+numItemsInput.textContent =  numItems + " jobs saved";
 
 let urlInput = document.getElementById("site-link");
 const urlInputBtn = document.getElementById("input-url-in");
@@ -18,7 +26,7 @@ const saveLinkBtn = document.getElementById("save-link");
 const downloadBtn = document.getElementById("download-csv");
 
 function setInputs() {
-    colInputs = JSON.parse(localStorage.getItem("colInputs")) || {};
+    colInputs = localStorage.getItem("colInputs") ? JSON.parse(localStorage.getItem("colInputs")) : {};
     let allInputs = document.querySelectorAll(".addedContainer");
     for (let input of allInputs) {
         let lab = colInputs[input.querySelector('.column-label').textContent];
@@ -120,22 +128,34 @@ const csvInput = (event) => {
     overlay.classList.toggle("hide");
 }
 
+function escapeCSV(value) {
+    if (value.includes('"')) {
+        value = value.replace(/"/g, '""');
+    }
+    if (value.includes(",") || value.includes("\n")) {
+        value = `"${value}"`;
+    }
+    return value;
+}
+
 const saveToCSV = () => {
-    let csvContent = "data:text/csv;charset=utf-8,";
-    let headers = ["Column", "Input"];
-    let rows = [["url", colInputs["url"] || ""]]; // Include URL row
+    const c = document.querySelectorAll(".addedContainer");
+    let arr = [escapeCSV(document.querySelector("#site-link").value)];
 
-    colNames.forEach(col => {
-        rows.push([col, colInputs[col] || ""]);
-    });
-
-    csvContent += headers.join(",") + "\n";
-    rows.forEach(row => {
-        csvContent += row.join(",") + "\n";
-    });
-
-    localStorage.setItem("csvData", csvContent);
-    console.log("CSV saved to localStorage");
+    let count = 0;
+    for (let r of c) {
+        let i = r.querySelector(".column-label").textContent;
+        while (i !== totalCols[count]) {
+            console.log("colName: " + colNames[count]);
+            console.log("i: " + i);
+            arr.push("");
+            count += 1;
+        }
+        arr.push(escapeCSV(r.querySelector(".column-input").value) || "");
+        count += 1;
+    }
+    items.push(arr.join(","));
+    localStorage.setItem("total-items", JSON.stringify(items));
 
     // Clear inputs after saving
     colNames.forEach(col => {
@@ -144,10 +164,21 @@ const saveToCSV = () => {
     colInputs["url"] = "";
     localStorage.setItem("colInputs", JSON.stringify(colInputs));
     renderNames();
+    numItems += 1;
+    numItemsInput.textContent = numItems + " jobs saved";
+    localStorage.setItem("numItems", JSON.stringify(numItems));
 };
 
-const downloadCSV = () => {
-    let csvContent = localStorage.getItem("csvData");
+const downloadCSV = (event) => {
+    event.preventDefault();
+    let csvContent = "data:text/csv;charset=utf-8,";
+    let headers = totalCols;
+    
+    csvContent += "url," + headers.join(",") + "\n";
+    items.forEach(row => {
+        csvContent += row + "\n";
+    });
+
     if (!csvContent) {
         console.log("No CSV data found in localStorage");
         return;
@@ -197,7 +228,9 @@ newColForm.addEventListener("submit", (event) => {
         return;
     }
     colNames.push(colNameInput.value);
+    totalCols.push(colNameInput.value);
     localStorage.setItem("colNames", JSON.stringify(colNames));
+    localStorage.setItem("totalCols", JSON.stringify(totalCols));
     colNameInput.value = "";
     newColForm.classList.toggle("hide");
     overlay.classList.toggle("hide");
@@ -205,7 +238,12 @@ newColForm.addEventListener("submit", (event) => {
 });
 
 document.getElementById("clear-csv").addEventListener("click", ()=> {
-    localStorage.setItem("csvData", "");
+    localStorage.setItem("total-items", JSON.stringify([]));
+    totalCols = colNames;
+    localStorage.setItem("totalCols", JSON.stringify([]));
+    numItemsInput.textContent = "0 jobs saved";
+    numItems = 0;
+    localStorage.setItem("numItems", JSON.stringify(0));
 });
 
 
