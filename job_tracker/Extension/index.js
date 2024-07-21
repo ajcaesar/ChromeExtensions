@@ -5,6 +5,7 @@ const newColForm = document.getElementById("new-column");
 const newColDel = document.getElementById("new-col-del");
 const inputs = document.getElementById("all-inputs");
 let delButtons = document.querySelectorAll(".col-del-button");
+const aiFill = document.getElementById("ai-fill");
 
 const csvForm = document.getElementById("csv-title");
 const csvDel = document.getElementById("csv-del");
@@ -23,7 +24,6 @@ let numItemsInput = document.getElementById("num-items");
 numItemsInput.textContent =  numItems + " jobs saved";
 
 let urlInput = document.getElementById("site-link");
-const urlInputBtn = document.getElementById("input-url-in");
 const saveLinkBtn = document.getElementById("save-link");
 const downloadBtn = document.getElementById("download-csv");
 
@@ -110,6 +110,14 @@ const possibleUrls = [
     { regex: /ziprecruiter\.com\/ojob/, script: 'content/zipRecruiterContent.js' }
   ];
   
+  function combineArrays(arr1, arr2) {
+    for (let z of arr2) {
+        if (!(arr1.includes(z))) {
+            arr1.push(z);
+        }
+    }
+    return arr1;
+}
   function injectContentScript(url, tabId) {
     const match = possibleUrls.find(obj => obj.regex.test(url));
     if (match) {
@@ -122,7 +130,7 @@ const possibleUrls = [
             if (response) {
             console.log('Job data extracted:', response); // Debugging output
             colNames = Object.keys(response);
-            totalCols = [...colNames];
+            totalCols = combineArrays(totalCols, colNames);
             localStorage.setItem("colNames", JSON.stringify(colNames));
             localStorage.setItem("totalCols", JSON.stringify(totalCols));
             colInputs = Object.assign({}, response);
@@ -141,16 +149,13 @@ const possibleUrls = [
   
   document.addEventListener('DOMContentLoaded', () => {
     setCurrentTabUrl();
-    urlInputBtn.addEventListener('click', setCurrentTabUrl);
-    autoFill.addEventListener("click", () => {
+
+    autoFill.addEventListener("click", (event) => {
+        event.preventDefault();
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             const activeTab = tabs[0];
             injectContentScript(activeTab.url, activeTab.id);
         });
-    });
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    const activeTab = tabs[0];
-    injectContentScript(activeTab.url, activeTab.id);
     });
   });
 
@@ -240,12 +245,12 @@ const saveToCSV = () => {
     colNames.forEach(col => {
         colInputs[col] = "";
     });
-    colInputs["url"] = "";
     localStorage.setItem("colInputs", JSON.stringify(colInputs));
     renderNames();
     numItems += 1;
     numItemsInput.textContent = numItems + " jobs saved";
     localStorage.setItem("numItems", JSON.stringify(numItems));
+    setCurrentTabUrl();
 };
 
 const downloadCSV = (event) => {
@@ -307,9 +312,6 @@ csvDel.addEventListener("click", (event) => {
 // Set URL when the extension loads
 document.addEventListener('DOMContentLoaded', setCurrentTabUrl);
 
-// Set URL when the button is clicked
-urlInputBtn.addEventListener('click', setCurrentTabUrl);
-
 addColButton.addEventListener("click", (event) => {
     event.preventDefault();
     newColForm.classList.toggle("hide");
@@ -348,4 +350,60 @@ document.getElementById("clear-csv").addEventListener("click", ()=> {
     numItems = 0;
     localStorage.setItem("numItems", JSON.stringify(0));
 });
+
+
+
+function handleAiFillClick(event) {
+    event.preventDefault();
+    const url = urlInput.value.trim();
+
+    if (!url) {
+        alert('Url must be entered');
+        return;
+    }
+
+    // Disable the button and show loading state
+    aiFill.disabled = true;
+    aiFill.textContent = 'Loading...';
+
+    // Send message to background script
+    chrome.runtime.sendMessage(
+        { 
+            action: 'getPerplexityResponse', 
+            prompt: `${url}`
+        },
+        (response) => {
+            // Re-enable the button
+            aiFill.disabled = false;
+            aiFill.textContent = 'ai fill';
+
+            if (response.error) {
+                console.error('Error:', response.error);
+                alert('An error occurred. Please try again.');
+            } else {
+                // Process the response
+                try {
+                    const data = JSON.parse(response.response);
+                    colNames = Object.keys(data);
+                    totalCols = combineArrays(totalCols, colNames);
+                    localStorage.setItem("colNames", JSON.stringify(colNames));
+                    localStorage.setItem("totalCols", JSON.stringify(totalCols));
+                    colInputs = Object.assign({}, data);
+                    colInputs['url'] = url;
+                    localStorage.setItem("colInputs", JSON.stringify(colInputs));
+                    console.log("data");
+                    console.log(data)
+                    renderNames();
+                } catch (e) {
+                    console.error('Error parsing JSON:', e);
+                    alert('Error processing the response. Please try again.');
+                }
+            }
+        }
+    );
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    aiFill.addEventListener('click', handleAiFillClick);
+})
 

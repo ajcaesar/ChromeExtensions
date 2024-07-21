@@ -11,8 +11,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         // Extract the job title, company name, location, and pay range
         const jobTitle = getTextContent('.top-card-layout__title');
-        const companyName = getTextContent('.topcard__org-name-link.topcard__flavor--black-link');
-        const location = getTextContent('[topcard__org-name-link.topcard__flavor--black-link');
+        const companyName = getTextContent('.topcard__org-name-link');
+        const location = getTextContent('topcard__flavor--bullet');
         const postDate = getTextContent(".posted-time-ago__text");
 
         // Create a job details object

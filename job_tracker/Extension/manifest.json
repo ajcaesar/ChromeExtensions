@@ -12,15 +12,15 @@
     "storage"
   ],
   "host_permissions": [
+    "<all_urls>",
     "https://*.indeed.com/*",
-    "indeed.com/*",
     "https://*.glassdoor.com/*",
-    "glassdoor.com/*",
     "https://*.linkedin.com/*",
-    "linkedin.com/*",
-    "https://*.ziprecruiter.com/*",
-    "ziprecruiter.com/*"
+    "https://*.ziprecruiter.com/*"
   ],
+  "background": {
+    "service_worker": "usingPerplexity/perplexity.js"
+  },
   "content_scripts": [
     {
       "matches": ["https://*.indeed.com/*"],

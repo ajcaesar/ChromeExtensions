@@ -14,7 +14,7 @@ body {
     background-color: var(--bkg);
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     border-radius: 10px;
-    width: 450px;
+    width: 480px;
     border-radius: 10px;
 }
 
@@ -181,6 +181,7 @@ button#new-column-submit, button#csv-title-submit {
     border-radius: 10px;
     margin-right: 0px;
     margin-bottom: 5px;
+    flex: 1;
 }
 
 #input-data-automatic {
