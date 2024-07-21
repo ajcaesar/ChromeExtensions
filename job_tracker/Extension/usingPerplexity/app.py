@@ -5,7 +5,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 import time
-from xvfbwrapper import Xvfb
 from selenium.webdriver.support import expected_conditions as EC
 import subprocess
 
@@ -80,7 +79,7 @@ def string_to_dict(input_string):
     return data
 
 def promptify (url):
-    return ("""get json of just location, company, jobTitle, payRange, deadline for """ + url.split("www.")[-1] + " . data as strings. json as code, no text. none if not found")
+    return ("""get json of just jobTitle, company, location, payRange, deadline for """ + url.split("www.")[-1] + " . data as strings. json as code, no text. none if not found")
 
 @app.route('/perplexity', methods=['POST'])
 def perplexity():
