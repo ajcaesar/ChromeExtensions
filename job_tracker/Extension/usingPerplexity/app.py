@@ -10,15 +10,6 @@ from selenium.webdriver.support import expected_conditions as EC
 
 app = Flask(__name__)
 
-def has_full_sentence(driver, locator):
-    element = driver.find_element(*locator)
-    children = element.find_elements(By.XPATH, "./*")
-    sentence_endings = ('.', '!', '?')
-    for child in children:
-        if child.tcopiext.strip() and child.text.strip()[-1] in sentence_endings:
-            return True
-    return False
-
 def GetPerplexityResponse(prompt, chrome_driver_path, max_retries=1, headless=False):
     options = webdriver.ChromeOptions()
     if headless:
@@ -32,7 +23,6 @@ def GetPerplexityResponse(prompt, chrome_driver_path, max_retries=1, headless=Fa
         time.sleep(1)
         button = driver.find_element(By.CSS_SELECTOR, "button[aria-label=\'Submit\']")
         driver.execute_script("arguments[0].click();", button)
-        time.sleep(5)
         code_element = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, "code"))
         )
