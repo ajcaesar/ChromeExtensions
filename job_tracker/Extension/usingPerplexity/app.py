@@ -79,7 +79,7 @@ def string_to_dict(input_string):
     return data
 
 def promptify (url):
-    return ("""get json of just jobTitle, company, location, payRange, deadline for """ + url.split("www.")[-1] + " . data as strings. json as code, no text. none if not found")
+    return ("""JSON with jobTitle, company, location, payRange, deadline for """ + url.split("www.")[-1] + """. Code format. Strings only. Use null if not found.""")
 
 @app.route('/perplexity', methods=['POST'])
 def perplexity():
