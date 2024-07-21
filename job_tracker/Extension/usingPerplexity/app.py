@@ -23,12 +23,13 @@ def GetPerplexityResponse(prompt, chrome_driver_path, max_retries=1, headless=Fa
         time.sleep(1)
         button = driver.find_element(By.CSS_SELECTOR, "button[aria-label=\'Submit\']")
         driver.execute_script("arguments[0].click();", button)
-        code_element = WebDriverWait(driver, 10).until(
+        code_element = WebDriverWait(driver, 7).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, "code"))
         )
         code_text = code_element.text
+        time.sleep(1.5)
+        code_text = driver.find_element(By.CSS_SELECTOR, "code").text
         
-
         # Clean up the text
         lines = code_text.split('\n')
         cleaned_lines = [line.strip() for line in lines if line.strip()]
@@ -67,7 +68,7 @@ def string_to_dict(input_string):
     return data
 
 def promptify (url):
-    return ("""get json of just location, company, jobTitle, compensation for """ + url.split("www.")[-1] + " . data as strings")
+    return ("""get json of just location, company, jobTitle, payRange for """ + url.split("www.")[-1] + " . data as strings. json as code, no text")
 
 @app.route('/perplexity', methods=['POST'])
 def perplexity():
